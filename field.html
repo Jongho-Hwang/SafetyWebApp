@@ -7,12 +7,12 @@
   <style>
     body { font-family: Arial, sans-serif; background: #f2f2f2; padding: 20px; }
     .container { max-width: 480px; margin: auto; background: #fff; padding: 15px;
-       border-radius: 10px; box-shadow: 0 0 5px rgba(0,0,0,0.1); }
+      border-radius: 10px; box-shadow: 0 0 5px rgba(0,0,0,0.1); }
     h1 { text-align: center; margin-bottom: 20px; }
     input[type="text"] { width: 100%; padding: 8px; margin-bottom: 5px;
-       border: 1px solid #ddd; border-radius: 5px; }
+      border: 1px solid #ddd; border-radius: 5px; }
     .button { padding: 8px 12px; border: none; border-radius: 5px;
-       background-color: #007aff; color: #fff; cursor: pointer; }
+      background-color: #007aff; color: #fff; cursor: pointer; }
     .button:hover { background-color: #005bb5; }
     .link-list div { margin-bottom: 5px; }
   </style>
@@ -34,10 +34,12 @@
 
     let fieldLinks = [];
     let currentField = "";
+
     function getQueryParam(param) {
       const urlParams = new URLSearchParams(window.location.search);
       return urlParams.get(param);
     }
+
     async function loadFieldData() {
       currentField = getQueryParam("fieldName");
       if (!currentField) {
@@ -60,6 +62,7 @@
         console.error("현장 데이터 로드 에러:", error);
       }
     }
+
     function updateFieldLinksUI() {
       const listDiv = document.getElementById("field-link-list");
       listDiv.innerHTML = "";
@@ -70,6 +73,7 @@
         listDiv.appendChild(div);
       });
     }
+
     window.addFieldLink = async function() {
       const name = document.getElementById("field-link-name").value.trim();
       const url = document.getElementById("field-link-url").value.trim();
@@ -91,6 +95,7 @@
          alert("최대 3개의 링크만 등록 가능합니다.");
       }
     }
+
     window.editFieldLink = async function(index) {
       const item = fieldLinks[index];
       const newName = prompt("새로운 링크 이름을 입력해주세요:", item.name);
@@ -105,16 +110,19 @@
         console.error("현장 링크 수정 에러:", error);
       }
     }
+
     window.showWorkerURL = function() {
       const workerPageURL = window.location.origin +
         window.location.pathname.replace("field.html", "worker.html") +
         "?fieldName=" + encodeURIComponent(currentField);
       document.getElementById("worker-url").innerText = "근로자용 페이지 URL: " + workerPageURL;
     }
-    window.goToLogin = function(){
+
+    window.goToLogin = function() {
       window.location.href = "index.html";
     }
-    window.addEventListener('load', loadFieldData);
+
+    document.addEventListener('DOMContentLoaded', loadFieldData);
   </script>
 </head>
 <body>
