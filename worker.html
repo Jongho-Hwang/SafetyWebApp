@@ -7,13 +7,29 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: Arial, sans-serif; background-color: #f2f2f2; padding: 10px; }
-    .container { max-width: 480px; margin: auto; background: #fff; padding: 15px;
-       border-radius: 10px; box-shadow: 0 0 5px rgba(0,0,0,0.1); }
+    .container { 
+      max-width: 480px; 
+      margin: auto; 
+      background: #fff; 
+      padding: 15px; 
+      border-radius: 10px; 
+      box-shadow: 0 0 5px rgba(0,0,0,0.1); 
+    }
     .header { text-align: center; margin-bottom: 20px; }
     .header h1 { font-size: 20px; }
-    .icon-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-    .icon { background-color: #e0e0e0; border-radius: 15px; padding: 20px;
-       text-align: center; font-size: 14px; cursor: pointer; }
+    .icon-grid { 
+      display: grid; 
+      grid-template-columns: repeat(3, 1fr); 
+      gap: 10px; 
+    }
+    .icon { 
+      background-color: #e0e0e0; 
+      border-radius: 15px; 
+      padding: 20px; 
+      text-align: center; 
+      font-size: 14px; 
+      cursor: pointer; 
+    }
     .icon:hover { background-color: #c0c0c0; }
   </style>
   <script type="module">
@@ -28,6 +44,7 @@
       messagingSenderId: "963611219921",
       appId: "1:963611219921:web:4193103bf34a50b78df2f0"
     };
+    
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     
@@ -48,13 +65,15 @@
       }
       document.getElementById("page-title").innerText = currentField + " 안전게시판";
       try {
-        const hqDoc = await getDoc(doc(db, "config", "hqLinks"));
-        if (hqDoc.exists()) {
-          adminLinks = hqDoc.data().links || [];
+        // 본사 링크 로드
+        const hqDocSnap = await getDoc(doc(db, "config", "hqLinks"));
+        if (hqDocSnap.exists()) {
+          adminLinks = hqDocSnap.data().links || [];
         }
-        const fieldDoc = await getDoc(doc(db, "fields", currentField));
-        if (fieldDoc.exists()) {
-          fieldLinks = fieldDoc.data().fieldLinks || [];
+        // 현장 링크 로드
+        const fieldDocSnap = await getDoc(doc(db, "fields", currentField));
+        if (fieldDocSnap.exists()) {
+          fieldLinks = fieldDocSnap.data().fieldLinks || [];
         }
         updateIcons();
       } catch (error) {
@@ -77,7 +96,8 @@
       });
     }
     
-    function openLink(type, index) {
+    // window.openLink를 window 객체에 할당하여 inline onclick에서 접근 가능하게 함
+    window.openLink = function(type, index) {
       let url = "";
       if (type === "hq") {
         if (adminLinks[index]) {
