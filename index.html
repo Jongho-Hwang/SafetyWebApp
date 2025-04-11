@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>로그인 페이지</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f2f2f2; padding: 20px; }
+    .container {
+      max-width: 400px; margin: auto; background: #fff; padding: 20px;
+      border-radius: 10px; box-shadow: 0 0 5px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    input[type="text"] {
+      width: 80%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px;
+    }
+    .button {
+      padding: 10px 15px; border: none; border-radius: 5px; 
+      background-color: #007aff; color: #fff; cursor: pointer;
+    }
+    .button:hover { background-color: #005bb5; }
+    p { margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>로그인</h1>
+    <p>코드를 입력하세요.</p>
+    <input type="text" id="login-code" placeholder="코드 입력">
+    <br>
+    <button class="button" onclick="login()">로그인</button>
+    <p id="error-msg" style="color:red;"></p>
+    <p><strong>예시:</strong> 본사관리자용 코드: safety02^^</p>
+    <p>생성된 현장명(예: 서울현장)으로도 로그인 가능</p>
+  </div>
+
+  <script>
+    function login() {
+      var code = document.getElementById("login-code").value.trim();
+      // 본사관리자용 코드
+      if(code === "safety02^^"){
+        window.location.href = "admin.html";
+        return;
+      }
+      // localStorage에 저장된 fields 목록에서 현장명을 검색
+      var fields = JSON.parse(localStorage.getItem("fields") || "[]");
+      var found = fields.find(field => field.fieldName === code);
+      if(found) {
+        window.location.href = "field.html?fieldName=" + encodeURIComponent(code);
+        return;
+      }
+      document.getElementById("error-msg").innerText = "잘못된 코드입니다.";
+    }
+  </script>
+</body>
+</html>
