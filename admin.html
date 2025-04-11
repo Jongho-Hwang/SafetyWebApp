@@ -22,11 +22,20 @@
     }
     .button:hover { background-color: #005bb5; }
     .link-list div { margin-bottom: 5px; }
+    ul { list-style: none; padding-left: 0; }
+    li { margin-bottom: 5px; }
+    li button {
+      margin-left: 10px; padding: 3px 6px; font-size: 12px;
+      background-color: #ff4d4d; color: white; border: none; border-radius: 3px; cursor: pointer;
+    }
+    li button:hover { background-color: #e60000; }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>본사관리자 페이지</h1>
+    
+    <!-- 본사 링크 등록 섹션 -->
     <h2>본사 링크 등록 (최대 6개)</h2>
     <div id="hq-link-list"></div>
     <div class="form-group">
@@ -37,6 +46,7 @@
     
     <hr>
     
+    <!-- 현장관리자 페이지 생성 섹션 -->
     <h2>현장관리자 페이지 생성</h2>
     <div class="form-group">
       <input type="text" id="new-field-name" placeholder="현장명 입력" />
@@ -53,7 +63,9 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-    import { getFirestore, doc, getDoc, setDoc, getDocs, collection } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+    import { 
+      getFirestore, doc, getDoc, setDoc, getDocs, collection, deleteDoc 
+    } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDfstivyFdcfw8aVyp9bL5d4GJX3knQmIk",
@@ -63,7 +75,6 @@
       messagingSenderId: "963611219921",
       appId: "1:963611219921:web:4193103bf34a50b78df2f0"
     };
-
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
@@ -135,6 +146,7 @@
       }
     }
 
+    // 현장 관리자 페이지 생성 및 삭제 기능
     window.createFieldPage = async function() {
       const fieldName = document.getElementById("new-field-name").value.trim();
       if (fieldName === "") {
@@ -157,6 +169,18 @@
       }
     }
 
+    window.deleteFieldPage = async function(fieldName) {
+      if (confirm("정말 " + fieldName + " 페이지를 삭제하시겠습니까?")) {
+        try {
+          await deleteDoc(doc(db, "fields", fieldName));
+          alert(fieldName + " 페이지가 삭제되었습니다.");
+          await updateFieldList();
+        } catch (error) {
+          console.error("현장 페이지 삭제 에러:", error);
+        }
+      }
+    }
+
     window.updateFieldList = async function() {
       try {
         const querySnapshot = await getDocs(collection(db, "fields"));
@@ -164,7 +188,9 @@
         ul.innerHTML = "";
         querySnapshot.forEach(docSnap => {
           const li = document.createElement("li");
-          li.innerHTML = `<a href="field.html?fieldName=${encodeURIComponent(docSnap.id)}">${docSnap.id} 안전게시판</a>`;
+          li.innerHTML =
+            `<a href="field.html?fieldName=${encodeURIComponent(docSnap.id)}">${docSnap.id} 안전게시판</a>
+             <button onclick="deleteFieldPage('${docSnap.id}')">삭제</button>`;
           ul.appendChild(li);
         });
       } catch (error) {
