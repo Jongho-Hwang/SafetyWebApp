@@ -12,8 +12,9 @@
     }
     h1, h2 { text-align: center; }
     .form-group { margin-bottom: 10px; }
-    input[type="text"] { width: 100%; padding: 8px; margin-bottom: 5px;
-      border: 1px solid #ddd; border-radius: 5px; }
+    input[type="text"] {
+      width: 100%; padding: 8px; margin-bottom: 5px; border: 1px solid #ddd; border-radius: 5px;
+    }
     .button { padding: 8px 12px; border: none; border-radius: 5px;
       background-color: #007aff; color: #fff; cursor: pointer; }
     .button:hover { background-color: #005bb5; }
@@ -43,10 +44,11 @@
     <br>
     <button class="button" onclick="goToLogin()">로그아웃</button>
   </div>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
     import { getFirestore, doc, getDoc, setDoc, getDocs, collection } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
-
+    
     const firebaseConfig = {
       apiKey: "AIzaSyDfstivyFdcfw8aVyp9bL5d4GJX3knQmIk",
       authDomain: "safetywebapp-f678d.firebaseapp.com",
@@ -55,12 +57,11 @@
       messagingSenderId: "963611219921",
       appId: "1:963611219921:web:4193103bf34a50b78df2f0"
     };
-
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-
+    
     let hqLinks = [];
-
+    
     async function loadHQLinks() {
       try {
         const docRef = doc(db, "config", "hqLinks");
@@ -76,7 +77,7 @@
         console.error("HQ 링크 로드 에러:", error);
       }
     }
-
+    
     function updateHQLinksUI() {
       const listDiv = document.getElementById("hq-link-list");
       listDiv.innerHTML = "";
@@ -87,7 +88,7 @@
         listDiv.appendChild(div);
       });
     }
-
+    
     window.addHQLink = async function() {
       const name = document.getElementById("hq-link-name").value.trim();
       const url = document.getElementById("hq-link-url").value.trim();
@@ -109,7 +110,7 @@
          alert("최대 6개까지 등록 가능합니다.");
       }
     }
-
+    
     window.editHQLink = async function(index) {
       const item = hqLinks[index];
       const newName = prompt("새로운 링크 이름을 입력해주세요:", item.name);
@@ -124,7 +125,7 @@
         console.error("HQ 링크 수정 에러:", error);
       }
     }
-
+    
     window.createFieldPage = async function() {
       const fieldName = document.getElementById("new-field-name").value.trim();
       if(fieldName === ""){
@@ -139,14 +140,14 @@
           return;
         }
         await setDoc(fieldDocRef, { fieldLinks: [] });
-        updateFieldList();
+        await updateFieldList();
         alert("현장관리자 페이지가 생성되었습니다: " + fieldName + " 안전게시판");
         document.getElementById("new-field-name").value = "";
       } catch (error) {
         console.error("현장 페이지 생성 에러:", error);
       }
     }
-
+    
     window.updateFieldList = async function() {
       try {
         const querySnapshot = await getDocs(collection(db, "fields"));
@@ -161,12 +162,12 @@
         console.error("현장 목록 업데이트 에러:", error);
       }
     }
-
-    window.goToLogin = function() {
+    
+    window.goToLogin = function(){
       window.location.href = "index.html";
     }
-
-    document.addEventListener('DOMContentLoaded', async () => {
+    
+    window.addEventListener('load', async () => {
       await loadHQLinks();
       await updateFieldList();
     });
