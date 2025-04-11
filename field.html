@@ -1,31 +1,130 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>현장관리자 페이지</title>
   <style>
     body { font-family: Arial, sans-serif; background: #f2f2f2; padding: 20px; }
-    .container {
-      max-width: 480px; margin: auto; background: #fff; padding: 15px;
-      border-radius: 10px; box-shadow: 0 0 5px rgba(0,0,0,0.1);
-    }
+    .container { max-width: 480px; margin: auto; background: #fff; padding: 15px;
+       border-radius: 10px; box-shadow: 0 0 5px rgba(0,0,0,0.1); }
     h1 { text-align: center; margin-bottom: 20px; }
-    input[type="text"] {
-      width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 5px;
-    }
-    .button {
-      padding: 8px 12px; border: none; border-radius: 5px; background-color: #007aff; color: #fff; cursor: pointer;
-    }
+    input[type="text"] { width: 100%; padding: 8px; margin-bottom: 5px;
+       border: 1px solid #ddd; border-radius: 5px; }
+    .button { padding: 8px 12px; border: none; border-radius: 5px;
+       background-color: #007aff; color: #fff; cursor: pointer; }
     .button:hover { background-color: #005bb5; }
     .link-list div { margin-bottom: 5px; }
   </style>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDfstivyFdcfw8aVyp9bL5d4GJX3knQmIk",
+      authDomain: "safetywebapp-f678d.firebaseapp.com",
+      projectId: "safetywebapp-f678d",
+      storageBucket: "safetywebapp-f678d.firebasestorage.app",
+      messagingSenderId: "963611219921",
+      appId: "1:963611219921:web:4193103bf34a50b78df2f0"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    let fieldLinks = [];
+    let currentField = "";
+    function getQueryParam(param) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(param);
+    }
+    async function loadFieldData() {
+      currentField = getQueryParam("fieldName");
+      if (!currentField) {
+        alert("현장명이 없습니다.");
+        window.location.href = "index.html";
+        return;
+      }
+      document.getElementById("page-title").innerText = currentField + " 안전게시판";
+      try {
+        const fieldDocRef = doc(db, "fields", currentField);
+        const docSnap = await getDoc(fieldDocRef);
+        if (docSnap.exists()) {
+          fieldLinks = docSnap.data().fieldLinks || [];
+          updateFieldLinksUI();
+        } else {
+          await setDoc(fieldDocRef, { fieldLinks: [] });
+          fieldLinks = [];
+        }
+      } catch (error) {
+        console.error("현장 데이터 로드 에러:", error);
+      }
+    }
+    function updateFieldLinksUI() {
+      const listDiv = document.getElementById("field-link-list");
+      listDiv.innerHTML = "";
+      fieldLinks.forEach((item, index) => {
+        const div = document.createElement("div");
+        div.innerHTML = (index + 1) + ". " + item.name + " (" + item.url + ") " +
+          `<button onclick="editFieldLink(${index})">수정</button>`;
+        listDiv.appendChild(div);
+      });
+    }
+    window.addFieldLink = async function() {
+      const name = document.getElementById("field-link-name").value.trim();
+      const url = document.getElementById("field-link-url").value.trim();
+      if(name === "" || url === ""){
+         alert("링크 이름과 URL을 모두 입력해주세요.");
+         return;
+      }
+      if(fieldLinks.length < 3){
+         fieldLinks.push({ name: name, url: url });
+         try {
+           await setDoc(doc(db, "fields", currentField), { fieldLinks: fieldLinks });
+           updateFieldLinksUI();
+           document.getElementById("field-link-name").value = "";
+           document.getElementById("field-link-url").value = "";
+         } catch (error) {
+           console.error("현장 링크 저장 에러:", error);
+         }
+      } else {
+         alert("최대 3개의 링크만 등록 가능합니다.");
+      }
+    }
+    window.editFieldLink = async function(index) {
+      const item = fieldLinks[index];
+      const newName = prompt("새로운 링크 이름을 입력해주세요:", item.name);
+      if(newName === null || newName.trim() === "") return;
+      const newUrl = prompt("새로운 교육자료 링크 URL을 입력해주세요:", item.url);
+      if(newUrl === null || newUrl.trim() === "") return;
+      fieldLinks[index] = { name: newName.trim(), url: newUrl.trim() };
+      try {
+        await setDoc(doc(db, "fields", currentField), { fieldLinks: fieldLinks });
+        updateFieldLinksUI();
+      } catch (error) {
+        console.error("현장 링크 수정 에러:", error);
+      }
+    }
+    window.showWorkerURL = function() {
+      const workerPageURL = window.location.origin +
+        window.location.pathname.replace("field.html", "worker.html") +
+        "?fieldName=" + encodeURIComponent(currentField);
+      document.getElementById("worker-url").innerText = "근로자용 페이지 URL: " + workerPageURL;
+    }
+    window.goToLogin = function(){
+      window.location.href = "index.html";
+    }
+    window.addEventListener('load', loadFieldData);
+  </script>
 </head>
 <body>
   <div class="container">
     <h1 id="page-title">현장관리자 페이지</h1>
     <div id="field-link-list" class="link-list"></div>
-    <input type="text" id="field-link-input" placeholder="교육자료 링크 입력">
+    <div class="form-group">
+      <input type="text" id="field-link-name" placeholder="링크 이름 입력" />
+      <input type="text" id="field-link-url" placeholder="교육자료 링크 입력" />
+    </div>
     <button class="button" id="field-add-btn" onclick="addFieldLink()">링크 삽입하기</button>
     <br><br>
     <button class="button" onclick="showWorkerURL()">근로자용 페이지 수정하기</button>
@@ -33,83 +132,5 @@
     <br>
     <button class="button" onclick="goToLogin()">로그아웃</button>
   </div>
-
-  <script>
-    let fieldLinks = [];
-    let currentField = "";
-    // URL 쿼리 파라미터 추출 함수
-    function getQueryParam(param) {
-      let urlParams = new URLSearchParams(window.location.search);
-      return urlParams.get(param);
-    }
-    window.onload = function(){
-      currentField = getQueryParam("fieldName");
-      if (!currentField) {
-         alert("현장명이 없습니다.");
-         window.location.href = "index.html";
-         return;
-      }
-      document.getElementById("page-title").innerText = currentField + " 안전게시판";
-      // localStorage의 fields 데이터에서 현재 현장 데이터 불러오기
-      var fields = JSON.parse(localStorage.getItem("fields") || "[]");
-      var thisField = fields.find(field => field.fieldName === currentField);
-      if (thisField) {
-         fieldLinks = thisField.fieldLinks || [];
-         updateFieldLinks();
-      }
-    };
-    function addFieldLink(){
-      var input = document.getElementById("field-link-input");
-      var url = input.value.trim();
-      if(url === ""){
-         alert("링크를 입력해주세요.");
-         return;
-      }
-      if(fieldLinks.length < 3){
-         fieldLinks.push(url);
-         saveFieldLinks();
-         updateFieldLinks();
-         input.value = "";
-      } else {
-         alert("최대 3개의 링크만 등록 가능합니다.");
-      }
-    }
-    function updateFieldLinks(){
-      var listDiv = document.getElementById("field-link-list");
-      listDiv.innerHTML = "";
-      fieldLinks.forEach(function(link, index){
-         var div = document.createElement("div");
-         div.innerHTML = (index+1) + ". " + link + ' <button onclick="editFieldLink(' + index + ')">수정</button>';
-         listDiv.appendChild(div);
-      });
-    }
-    function editFieldLink(index){
-      var newLink = prompt("새로운 링크를 입력해주세요:", fieldLinks[index]);
-      if(newLink !== null && newLink.trim() !== ""){
-         fieldLinks[index] = newLink.trim();
-         saveFieldLinks();
-         updateFieldLinks();
-      }
-    }
-    function saveFieldLinks(){
-      // fields 배열에서 현재 현장 데이터 업데이트
-      var fields = JSON.parse(localStorage.getItem("fields") || "[]");
-      fields = fields.map(field => {
-         if(field.fieldName === currentField){
-            field.fieldLinks = fieldLinks;
-         }
-         return field;
-      });
-      localStorage.setItem("fields", JSON.stringify(fields));
-    }
-    function showWorkerURL(){
-      // 현장관리자 페이지에서 근로자용 페이지 URL 표시
-      var workerPageURL = window.location.origin + window.location.pathname.replace("field.html", "worker.html") + "?fieldName=" + encodeURIComponent(currentField);
-      document.getElementById("worker-url").innerText = "근로자용 페이지 URL: " + workerPageURL;
-    }
-    function goToLogin(){
-      window.location.href = "index.html";
-    }
-  </script>
 </body>
 </html>
