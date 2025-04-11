@@ -6,10 +6,8 @@
   <title>현장관리자 페이지</title>
   <style>
     body { font-family: Arial, sans-serif; background: #f2f2f2; padding: 20px; }
-    .container {
-      max-width: 480px; margin: auto; background: #fff; padding: 15px;
-      border-radius: 10px; box-shadow: 0 0 5px rgba(0,0,0,0.1);
-    }
+    .container { max-width: 480px; margin: auto; background: #fff; padding: 15px;
+       border-radius: 10px; box-shadow: 0 0 5px rgba(0,0,0,0.1); }
     h1 { text-align: center; margin-bottom: 20px; }
     input[type="text"] { width: 100%; padding: 8px; margin-bottom: 5px;
       border: 1px solid #ddd; border-radius: 5px; }
@@ -21,7 +19,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
     import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
-
+    
     const firebaseConfig = {
       apiKey: "AIzaSyDfstivyFdcfw8aVyp9bL5d4GJX3knQmIk",
       authDomain: "safetywebapp-f678d.firebaseapp.com",
@@ -32,15 +30,15 @@
     };
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-
+    
     let fieldLinks = [];
     let currentField = "";
-
+    
     function getQueryParam(param) {
       const urlParams = new URLSearchParams(window.location.search);
       return urlParams.get(param);
     }
-
+    
     async function loadFieldData() {
       currentField = getQueryParam("fieldName");
       if (!currentField) {
@@ -63,7 +61,7 @@
         console.error("현장 데이터 로드 에러:", error);
       }
     }
-
+    
     function updateFieldLinksUI() {
       const listDiv = document.getElementById("field-link-list");
       listDiv.innerHTML = "";
@@ -74,7 +72,7 @@
         listDiv.appendChild(div);
       });
     }
-
+    
     window.addFieldLink = async function() {
       const name = document.getElementById("field-link-name").value.trim();
       const url = document.getElementById("field-link-url").value.trim();
@@ -89,6 +87,7 @@
            updateFieldLinksUI();
            document.getElementById("field-link-name").value = "";
            document.getElementById("field-link-url").value = "";
+           alert("현장 링크가 삽입되었습니다.");
          } catch (error) {
            console.error("현장 링크 저장 에러:", error);
          }
@@ -96,7 +95,7 @@
          alert("최대 3개의 링크만 등록 가능합니다.");
       }
     }
-
+    
     window.editFieldLink = async function(index) {
       const item = fieldLinks[index];
       const newName = prompt("새로운 링크 이름을 입력해주세요:", item.name);
@@ -107,22 +106,28 @@
       try {
         await setDoc(doc(db, "fields", currentField), { fieldLinks: fieldLinks });
         updateFieldLinksUI();
+        alert("현장 링크가 수정되었습니다.");
       } catch (error) {
         console.error("현장 링크 수정 에러:", error);
       }
     }
-
-    window.showWorkerURL = function() {
+    
+    window.showWorkerURL = async function() {
       const workerPageURL = window.location.origin +
         window.location.pathname.replace("field.html", "worker.html") +
         "?fieldName=" + encodeURIComponent(currentField);
-      document.getElementById("worker-url").innerText = "근로자용 페이지 URL: " + workerPageURL;
+      try {
+        await navigator.clipboard.writeText(workerPageURL);
+        document.getElementById("worker-url").innerText = "근로자용 페이지 URL이 클립보드에 복사되었습니다: " + workerPageURL;
+      } catch (err) {
+        document.getElementById("worker-url").innerText = "URL 복사 실패, 직접 복사하세요: " + workerPageURL;
+      }
     }
-
+    
     window.goToLogin = function(){
       window.location.href = "index.html";
     }
-
+    
     document.addEventListener('DOMContentLoaded', loadFieldData);
   </script>
 </head>
@@ -132,11 +137,11 @@
     <div id="field-link-list" class="link-list"></div>
     <div class="form-group">
       <input type="text" id="field-link-name" placeholder="링크 이름 입력" />
-      <input type="text" id="field-link-url" placeholder="교육자료 링크 입력" />
+      <input type="text" id="field-link-url" placeholder="교육자료 링크 URL 입력" />
     </div>
     <button class="button" id="field-add-btn" onclick="addFieldLink()">링크 삽입하기</button>
     <br><br>
-    <button class="button" onclick="showWorkerURL()">근로자용 페이지 수정하기</button>
+    <button class="button" onclick="showWorkerURL()">근로자용 페이지 수정하기 (URL 복사)</button>
     <p id="worker-url"></p>
     <br>
     <button class="button" onclick="goToLogin()">로그아웃</button>
