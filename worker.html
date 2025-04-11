@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>근로자용 페이지</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; background-color: #f2f2f2; padding: 10px; }
+    .container {
+       max-width: 480px; margin: auto; background: #fff; padding: 15px;
+       border-radius: 10px; box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+    .header { text-align: center; margin-bottom: 20px; }
+    .header h1 { font-size: 20px; }
+    .icon-grid {
+       display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+    }
+    .icon {
+       background-color: #e0e0e0; border-radius: 15px; padding: 20px;
+       text-align: center; font-size: 14px; cursor: pointer;
+    }
+    .icon:hover { background-color: #c0c0c0; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1 id="page-title">안전게시판</h1>
+    </div>
+    <div class="icon-grid">
+      <!-- 본사관리자 링크 (최대 6개) -->
+      <div class="icon" id="icon-hq-1" onclick="openLink('hq',0)">HQ 링크1</div>
+      <div class="icon" id="icon-hq-2" onclick="openLink('hq',1)">HQ 링크2</div>
+      <div class="icon" id="icon-hq-3" onclick="openLink('hq',2)">HQ 링크3</div>
+      <div class="icon" id="icon-hq-4" onclick="openLink('hq',3)">HQ 링크4</div>
+      <div class="icon" id="icon-hq-5" onclick="openLink('hq',4)">HQ 링크5</div>
+      <div class="icon" id="icon-hq-6" onclick="openLink('hq',5)">HQ 링크6</div>
+      <!-- 현장관리자 링크 (최대 3개) -->
+      <div class="icon" id="icon-field-1" onclick="openLink('field',0)">현장 링크1</div>
+      <div class="icon" id="icon-field-2" onclick="openLink('field',1)">현장 링크2</div>
+      <div class="icon" id="icon-field-3" onclick="openLink('field',2)">현장 링크3</div>
+    </div>
+  </div>
+  <script>
+    let adminLinks = [];
+    let fieldLinks = [];
+    let currentField = "";
+    function getQueryParam(param) {
+      let urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(param);
+    }
+    window.onload = function(){
+      currentField = getQueryParam("fieldName");
+      if(!currentField){
+         alert("현장명이 없습니다.");
+         return;
+      }
+      document.getElementById("page-title").innerText = currentField + " 안전게시판";
+      // 본사 링크 로드
+      var savedHQ = localStorage.getItem("hqLinks");
+      if(savedHQ){
+         adminLinks = JSON.parse(savedHQ);
+      }
+      // 해당 현장관리자 데이터 로드
+      var fields = JSON.parse(localStorage.getItem("fields") || "[]");
+      var thisField = fields.find(field => field.fieldName === currentField);
+      if(thisField){
+         fieldLinks = thisField.fieldLinks || [];
+      }
+      updateIcons();
+    };
+    function updateIcons(){
+      // 본사 링크 아이콘 업데이트
+      adminLinks.forEach((link, index) => {
+         let icon = document.getElementById("icon-hq-" + (index+1));
+         if(icon){
+            icon.innerText = "HQ 링크" + (index+1);
+         }
+      });
+      // 현장 링크 아이콘 업데이트
+      fieldLinks.forEach((link, index) => {
+         let icon = document.getElementById("icon-field-" + (index+1));
+         if(icon){
+            icon.innerText = "현장 링크" + (index+1);
+         }
+      });
+    }
+    function openLink(type, index){
+      let url = "";
+      if(type === "hq"){
+         if(adminLinks[index]){
+            url = adminLinks[index];
+         } else { alert("해당 본사 링크가 없습니다."); return; }
+      } else if(type === "field"){
+         if(fieldLinks[index]){
+            url = fieldLinks[index];
+         } else { alert("해당 현장 링크가 없습니다."); return; }
+      }
+      window.open(url, "_blank");
+    }
+  </script>
+</body>
+</html>

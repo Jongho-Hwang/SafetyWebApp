@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>본사관리자 페이지</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f2f2f2; padding: 20px; }
+    .container {
+      max-width: 480px; margin: auto; background: #fff; padding: 15px;
+      border-radius: 10px; box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+    h1, h2 { text-align: center; }
+    .form-group { margin-bottom: 10px; }
+    input[type="text"] {
+      width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px;
+    }
+    .button {
+      padding: 8px 12px; border: none; border-radius: 5px; 
+      background-color: #007aff; color: #fff; cursor: pointer;
+    }
+    .button:hover { background-color: #005bb5; }
+    .link-list div { margin-bottom: 5px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>본사관리자 페이지</h1>
+    <!-- 본사 링크 등록 섹션 -->
+    <h2>본사 링크 등록 (최대 6개)</h2>
+    <div id="hq-link-list"></div>
+    <div class="form-group">
+      <input type="text" id="hq-link-input" placeholder="교육자료 링크 입력">
+    </div>
+    <button class="button" onclick="addHQLink()">링크 삽입하기</button>
+    <hr>
+    <!-- 현장 페이지 생성 섹션 -->
+    <h2>현장관리자 페이지 생성</h2>
+    <div class="form-group">
+      <input type="text" id="new-field-name" placeholder="현장명 입력">
+    </div>
+    <button class="button" onclick="createFieldPage()">현장 페이지 생성</button>
+    <div id="created-fields">
+      <h3>생성된 현장페이지 목록:</h3>
+      <ul id="field-list"></ul>
+    </div>
+    <br>
+    <button class="button" onclick="goToLogin()">로그아웃</button>
+  </div>
+
+  <script>
+    var hqLinks = [];
+    window.onload = function(){
+      // 본사 링크 불러오기
+      var savedHQ = localStorage.getItem("hqLinks");
+      if(savedHQ) {
+        hqLinks = JSON.parse(savedHQ);
+        updateHQLinks();
+      }
+      updateFieldList();
+    };
+    function addHQLink(){
+      var input = document.getElementById("hq-link-input");
+      var url = input.value.trim();
+      if(url === "") {
+         alert("링크를 입력해주세요.");
+         return;
+      }
+      if(hqLinks.length < 6){
+         hqLinks.push(url);
+         localStorage.setItem("hqLinks", JSON.stringify(hqLinks));
+         updateHQLinks();
+         input.value = "";
+      } else {
+         alert("최대 6개까지 등록 가능합니다.");
+      }
+    }
+    function updateHQLinks(){
+      var listDiv = document.getElementById("hq-link-list");
+      listDiv.innerHTML = "";
+      hqLinks.forEach(function(link, index){
+        var div = document.createElement("div");
+        div.innerText = (index+1) + ". " + link;
+        listDiv.appendChild(div);
+      });
+    }
+    function createFieldPage(){
+      var fieldName = document.getElementById("new-field-name").value.trim();
+      if(fieldName === ""){
+         alert("현장명을 입력해주세요.");
+         return;
+      }
+      // fields 배열에 추가 (중복확인)
+      var fields = JSON.parse(localStorage.getItem("fields") || "[]");
+      if(fields.find(field => field.fieldName === fieldName)){
+         alert("이미 존재하는 현장입니다.");
+         return;
+      }
+      fields.push({ fieldName: fieldName, fieldLinks: [] });
+      localStorage.setItem("fields", JSON.stringify(fields));
+      updateFieldList();
+      alert("현장관리자 페이지가 생성되었습니다: " + fieldName + " 안전게시판");
+      document.getElementById("new-field-name").value = "";
+    }
+    function updateFieldList(){
+      var fields = JSON.parse(localStorage.getItem("fields") || "[]");
+      var ul = document.getElementById("field-list");
+      ul.innerHTML = "";
+      fields.forEach(function(field){
+        var li = document.createElement("li");
+        li.innerHTML = '<a href="field.html?fieldName=' + encodeURIComponent(field.fieldName) + '">' + field.fieldName + ' 안전게시판</a>';
+        ul.appendChild(li);
+      });
+    }
+    function goToLogin(){
+      window.location.href = "login.html";
+    }
+  </script>
+</body>
+</html>
