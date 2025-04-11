@@ -6,14 +6,16 @@
   <title>본사관리자 페이지</title>
   <style>
     body { font-family: Arial, sans-serif; background: #f2f2f2; padding: 20px; }
-    .container { max-width: 480px; margin: auto; background: #fff; padding: 15px;
-       border-radius: 10px; box-shadow: 0 0 5px rgba(0,0,0,0.1); }
+    .container {
+      max-width: 480px; margin: auto; background: #fff; padding: 15px;
+      border-radius: 10px; box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
     h1, h2 { text-align: center; }
     .form-group { margin-bottom: 10px; }
     input[type="text"] { width: 100%; padding: 8px; margin-bottom: 5px;
-       border: 1px solid #ddd; border-radius: 5px; }
+      border: 1px solid #ddd; border-radius: 5px; }
     .button { padding: 8px 12px; border: none; border-radius: 5px;
-       background-color: #007aff; color: #fff; cursor: pointer; }
+      background-color: #007aff; color: #fff; cursor: pointer; }
     .button:hover { background-color: #005bb5; }
     .link-list div { margin-bottom: 5px; }
   </style>
@@ -41,7 +43,6 @@
     <br>
     <button class="button" onclick="goToLogin()">로그아웃</button>
   </div>
-
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
     import { getFirestore, doc, getDoc, setDoc, getDocs, collection } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
@@ -54,10 +55,12 @@
       messagingSenderId: "963611219921",
       appId: "1:963611219921:web:4193103bf34a50b78df2f0"
     };
+
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
     let hqLinks = [];
+
     async function loadHQLinks() {
       try {
         const docRef = doc(db, "config", "hqLinks");
@@ -73,6 +76,7 @@
         console.error("HQ 링크 로드 에러:", error);
       }
     }
+
     function updateHQLinksUI() {
       const listDiv = document.getElementById("hq-link-list");
       listDiv.innerHTML = "";
@@ -83,6 +87,7 @@
         listDiv.appendChild(div);
       });
     }
+
     window.addHQLink = async function() {
       const name = document.getElementById("hq-link-name").value.trim();
       const url = document.getElementById("hq-link-url").value.trim();
@@ -104,6 +109,7 @@
          alert("최대 6개까지 등록 가능합니다.");
       }
     }
+
     window.editHQLink = async function(index) {
       const item = hqLinks[index];
       const newName = prompt("새로운 링크 이름을 입력해주세요:", item.name);
@@ -118,6 +124,7 @@
         console.error("HQ 링크 수정 에러:", error);
       }
     }
+
     window.createFieldPage = async function() {
       const fieldName = document.getElementById("new-field-name").value.trim();
       if(fieldName === ""){
@@ -139,6 +146,7 @@
         console.error("현장 페이지 생성 에러:", error);
       }
     }
+
     window.updateFieldList = async function() {
       try {
         const querySnapshot = await getDocs(collection(db, "fields"));
@@ -153,10 +161,12 @@
         console.error("현장 목록 업데이트 에러:", error);
       }
     }
-    window.goToLogin = function(){
+
+    window.goToLogin = function() {
       window.location.href = "index.html";
     }
-    window.addEventListener('load', async () => {
+
+    document.addEventListener('DOMContentLoaded', async () => {
       await loadHQLinks();
       await updateFieldList();
     });
