@@ -8,18 +8,18 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: Arial, sans-serif; background-color: #f2f2f2; padding: 10px; }
     .container { max-width: 480px; margin: auto; background: #fff; padding: 15px;
-      border-radius: 10px; box-shadow: 0 0 5px rgba(0,0,0,0.1); }
+       border-radius: 10px; box-shadow: 0 0 5px rgba(0,0,0,0.1); }
     .header { text-align: center; margin-bottom: 20px; }
     .header h1 { font-size: 20px; }
     .icon-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
     .icon { background-color: #e0e0e0; border-radius: 15px; padding: 20px;
-      text-align: center; font-size: 14px; cursor: pointer; }
+       text-align: center; font-size: 14px; cursor: pointer; }
     .icon:hover { background-color: #c0c0c0; }
   </style>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
     import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
-
+    
     const firebaseConfig = {
       apiKey: "AIzaSyDfstivyFdcfw8aVyp9bL5d4GJX3knQmIk",
       authDomain: "safetywebapp-f678d.firebaseapp.com",
@@ -28,19 +28,18 @@
       messagingSenderId: "963611219921",
       appId: "1:963611219921:web:4193103bf34a50b78df2f0"
     };
-
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-
+    
     let adminLinks = [];
     let fieldLinks = [];
     let currentField = "";
-
+    
     function getQueryParam(param) {
       const urlParams = new URLSearchParams(window.location.search);
       return urlParams.get(param);
     }
-
+    
     async function loadLinks() {
       currentField = getQueryParam("fieldName");
       if (!currentField) {
@@ -49,22 +48,20 @@
       }
       document.getElementById("page-title").innerText = currentField + " 안전게시판";
       try {
-        const hqDocRef = doc(db, "config", "hqLinks");
-        const hqDocSnap = await getDoc(hqDocRef);
-        if (hqDocSnap.exists()) {
-          adminLinks = hqDocSnap.data().links || [];
+        const hqDoc = await getDoc(doc(db, "config", "hqLinks"));
+        if (hqDoc.exists()) {
+          adminLinks = hqDoc.data().links || [];
         }
-        const fieldDocRef = doc(db, "fields", currentField);
-        const fieldDocSnap = await getDoc(fieldDocRef);
-        if (fieldDocSnap.exists()) {
-          fieldLinks = fieldDocSnap.data().fieldLinks || [];
+        const fieldDoc = await getDoc(doc(db, "fields", currentField));
+        if (fieldDoc.exists()) {
+          fieldLinks = fieldDoc.data().fieldLinks || [];
         }
         updateIcons();
       } catch (error) {
         console.error("링크 로드 에러:", error);
       }
     }
-
+    
     function updateIcons(){
       adminLinks.forEach((item, index) => {
          const icon = document.getElementById("icon-hq-" + (index + 1));
@@ -79,7 +76,7 @@
          }
       });
     }
-
+    
     function openLink(type, index) {
       let url = "";
       if (type === "hq") {
@@ -99,8 +96,8 @@
       }
       window.open(url, "_blank");
     }
-
-    document.addEventListener('DOMContentLoaded', loadLinks);
+    
+    window.addEventListener('load', loadLinks);
   </script>
 </head>
 <body>
