@@ -46,7 +46,7 @@
       currentField = getQueryParam("fieldName");
       if (!currentField) {
          alert("현장명이 없습니다.");
-         window.location.href = "login.html";
+         window.location.href = "index.html";
          return;
       }
       document.getElementById("page-title").innerText = currentField + " 안전게시판";
@@ -108,7 +108,7 @@
       document.getElementById("worker-url").innerText = "근로자용 페이지 URL: " + workerPageURL;
     }
     function goToLogin(){
-      window.location.href = "login.html";
+      window.location.href = "index.html";
     }
   </script>
 </body>
